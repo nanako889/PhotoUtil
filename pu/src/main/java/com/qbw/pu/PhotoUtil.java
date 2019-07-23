@@ -141,7 +141,7 @@ public class PhotoUtil {
         getPhotoFromGallery(cropWidth, cropHeight, cropPath);
     }
 
-    public void cropPhoto(boolean camera, Activity activity, Uri uri, String photoFormat) {
+    public void cropPhoto(boolean camera, Uri uri, String photoFormat) {
         XLog.v("uri=%s, photoFormat=%s", uri.toString(), photoFormat);
         Intent intent = new Intent("com.android.camera.action.CROP");
         intent.setDataAndType(uri, "image/*");
@@ -162,17 +162,14 @@ public class PhotoUtil {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
-        activity.startActivityForResult(intent, mRequestCodeForCrop);
+        mActivity.startActivityForResult(intent, mRequestCodeForCrop);
     }
 
-    public void onActivityResult(Activity activity,
-                                 int requestCode,
-                                 int resultCode,
-                                 Intent intent) {
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == mRequestCodeForCamera || requestCode == mRequestCodeForGallery || requestCode == mRequestCodeForCrop) {
             switch (resultCode) {
                 case Activity.RESULT_OK:
-                    onActivityResultOk(activity, requestCode, intent);
+                    onActivityResultOk(requestCode, intent);
                     break;
                 case Activity.RESULT_CANCELED:
                     mCallBack.onPhotoCancel();
@@ -189,27 +186,21 @@ public class PhotoUtil {
         }
     }
 
-    private void onActivityResultOk(Activity activity, int requestCode, Intent intent) {
+    private void onActivityResultOk(int requestCode, Intent intent) {
         if (mRequestCodeForCamera == requestCode) {
             mRequestFrom = requestCode;
             if (mNeedCrop) {
-                cropPhoto(true,
-                          activity,
-                          getContentImageUri(activity, mPhotoCameraSavePath),
-                          "jpg");
+                cropPhoto(true, getContentImageUri(mActivity, mPhotoCameraSavePath), "jpg");
             } else {
                 mCallBack.onPhotoCamera(mPhotoCameraSavePath);
             }
         } else if (mRequestCodeForGallery == requestCode) {
             mRequestFrom = requestCode;
             if (null != intent && null != intent.getData()) {
-                String imagePath = getImagePath(activity, intent.getData());
+                String imagePath = getImagePath(mActivity, intent.getData());
                 XLog.d("pick image[%s] from gallery", imagePath);
                 if (mNeedCrop) {
-                    cropPhoto(false,
-                              activity,
-                              intent.getData(),
-                              getFileExtensionFromPath(imagePath));
+                    cropPhoto(false, intent.getData(), getFileExtensionFromPath(imagePath));
                 } else {
                     mCallBack.onPhotoGallery(imagePath);
                 }
