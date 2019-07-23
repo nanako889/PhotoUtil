@@ -169,19 +169,23 @@ public class PhotoUtil {
                                  int requestCode,
                                  int resultCode,
                                  Intent intent) {
-        switch (resultCode) {
-            case Activity.RESULT_OK:
-                onActivityResultOk(activity, requestCode, intent);
-                break;
-            case Activity.RESULT_CANCELED:
-                mCallBack.onPhotoCancel();
-                break;
-            case Activity.RESULT_FIRST_USER:
-                XLog.w("Start of user-defined activity results");
-                break;
-            default:
-                mCallBack.onPhotoFailed();
-                break;
+        if (requestCode == mRequestCodeForCamera || requestCode == mRequestCodeForGallery || requestCode == mRequestCodeForCrop) {
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+                    onActivityResultOk(activity, requestCode, intent);
+                    break;
+                case Activity.RESULT_CANCELED:
+                    mCallBack.onPhotoCancel();
+                    break;
+                case Activity.RESULT_FIRST_USER:
+                    XLog.w("Start of user-defined activity results");
+                    break;
+                default:
+                    mCallBack.onPhotoFailed();
+                    break;
+            }
+        } else {
+            XLog.w("Invalid requestCode[%d] for PhotoUtil", requestCode);
         }
     }
 
