@@ -51,10 +51,19 @@ public class PhotoUtil {
 
     private String mProviderNameAppend = "provider_photoutil";
 
+    private Activity mActivity;
     private CallBack mCallBack;
 
-    public PhotoUtil(CallBack callBack) {
+    public PhotoUtil(Activity activity,
+                     CallBack callBack,
+                     int requestCodeForCamera,
+                     int requestCodeForGallery,
+                     int requestCodeForCrop) {
+        mActivity = activity;
         mCallBack = callBack;
+        mRequestCodeForCamera = requestCodeForCamera;
+        mRequestCodeForGallery = requestCodeForGallery;
+        mRequestCodeForCrop = requestCodeForCrop;
     }
 
     public void setProviderNameAppend(String providerNameAppend) {
@@ -64,15 +73,10 @@ public class PhotoUtil {
     /**
      * 从相机获取图片
      */
-    public void getPhotoFromCamera(Activity activity,
-                                   int requestCodeForCamera,
-                                   int requestCodeForCrop,
-                                   String photoCameraSavePath,
+    public void getPhotoFromCamera(String photoCameraSavePath,
                                    int cropWidth,
                                    int cropHeight,
                                    String photoCropSavePathFormat) {
-        mRequestCodeForCamera = requestCodeForCamera;
-        mRequestCodeForCrop = requestCodeForCrop;
         mPhotoCameraSavePath = photoCameraSavePath;
         mNeedCrop = 0 != cropWidth && 0 != cropHeight;
         mCropWidth = cropWidth;
@@ -86,8 +90,8 @@ public class PhotoUtil {
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        getContentImageUri(activity, mPhotoCameraSavePath));
-        activity.startActivityForResult(intent, mRequestCodeForCamera);
+                        getContentImageUri(mActivity, mPhotoCameraSavePath));
+        mActivity.startActivityForResult(intent, mRequestCodeForCamera);
     }
 
     private Uri getContentImageUri(Activity activity, String filePath) {
@@ -100,52 +104,24 @@ public class PhotoUtil {
         }
     }
 
-    public void getPhotoFromCamera(Activity activity,
-                                   int requestCodeForCamera,
-                                   int requestCodeForCrop,
-                                   String photoCameraSavePath) {
-        getPhotoFromCamera(activity,
-                           requestCodeForCamera,
-                           requestCodeForCrop,
-                           photoCameraSavePath,
-                           0,
-                           0,
-                           "");
+    public void getPhotoFromCamera(String photoCameraSavePath) {
+        getPhotoFromCamera(photoCameraSavePath, 0, 0, "");
     }
 
-    public void getPhotoFromCamera(Activity activity,
-                                   int requestCodeForCamera,
-                                   int requestCodeForCrop,
-                                   int cropWidth,
-                                   int cropHeight) {
-        String headerPath = getFileDir(activity) + File.separator + "camera.jpg";
-        String cropPath = getFileDir(activity) + File.separator + "crop.%s";
-        getPhotoFromCamera(activity,
-                           requestCodeForCamera,
-                           requestCodeForCrop,
-                           headerPath,
-                           cropWidth,
-                           cropHeight,
-                           cropPath);
+    public void getPhotoFromCamera(int cropWidth, int cropHeight) {
+        String headerPath = getFileDir(mActivity) + File.separator + "camera.jpg";
+        String cropPath = getFileDir(mActivity) + File.separator + "crop.%s";
+        getPhotoFromCamera(headerPath, cropWidth, cropHeight, cropPath);
     }
 
-    public void getPhotoFromCamera(Activity activity,
-                                   int requestCodeForCamera,
-                                   int requestCodeForCrop) {
-        getPhotoFromCamera(activity, requestCodeForCamera, requestCodeForCrop, 0, 0);
+    public void getPhotoFromCamera() {
+        getPhotoFromCamera(0, 0);
     }
 
     /**
      * 从图库获取图片
      */
-    public void getPhotoFromGallery(Activity activity,
-                                    int requestCodeForGallery,
-                                    int requestCodeForCrop,
-                                    int cropWidth,
-                                    int cropHeight,
-                                    String photoCropSavePathFormat) {
-        mRequestCodeForGallery = requestCodeForGallery;
-        mRequestCodeForCrop = requestCodeForCrop;
+    public void getPhotoFromGallery(int cropWidth, int cropHeight, String photoCropSavePathFormat) {
         mNeedCrop = 0 != cropWidth && 0 != cropHeight;
         mCropWidth = cropWidth;
         mCropHeight = cropHeight;
@@ -153,27 +129,16 @@ public class PhotoUtil {
         XLog.d("mNeedCrop[%b], cropWidth[%d], cropHeight[%d]", mNeedCrop, cropWidth, cropHeight);
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        activity.startActivityForResult(intent, mRequestCodeForGallery);
+        mActivity.startActivityForResult(intent, mRequestCodeForGallery);
     }
 
-    public void getPhotoFromGallery(Activity activity,
-                                    int requestCodeForGallery,
-                                    int requestCodeForCrop) {
-        getPhotoFromGallery(activity, requestCodeForGallery, requestCodeForCrop, 0, 0, "");
+    public void getPhotoFromGallery() {
+        getPhotoFromGallery(0, 0, "");
     }
 
-    public void getPhotoFromGallery(Activity activity,
-                                    int requestCodeForGallery,
-                                    int requestCodeForCrop,
-                                    int cropWidth,
-                                    int cropHeight) {
-        String cropPath = getFileDir(activity) + File.separator + "crop.%s";
-        getPhotoFromGallery(activity,
-                            requestCodeForGallery,
-                            requestCodeForCrop,
-                            cropWidth,
-                            cropHeight,
-                            cropPath);
+    public void getPhotoFromGallery(int cropWidth, int cropHeight) {
+        String cropPath = getFileDir(mActivity) + File.separator + "crop.%s";
+        getPhotoFromGallery(cropWidth, cropHeight, cropPath);
     }
 
     public void cropPhoto(boolean camera, Activity activity, Uri uri, String photoFormat) {
