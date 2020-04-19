@@ -147,8 +147,8 @@ public class PhotoUtil {
         intent.setDataAndType(uri, "image/*");
         intent.putExtra("crop", "true");
         intent.putExtra("scale", "true");
-        intent.putExtra("aspectX", 1);
-        intent.putExtra("aspectY", 1);
+        intent.putExtra("aspectX", mCropWidth);
+        intent.putExtra("aspectY", mCropHeight);
         intent.putExtra("outputX", mCropWidth);
         intent.putExtra("outputY", mCropHeight);
         intent.putExtra("outputFormat", photoFormat);
